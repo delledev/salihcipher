@@ -94,7 +94,7 @@ export default function CipherApp() {
       <div className="w-full max-w-4xl">
       <div className="mb-8">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 via-blue-500 to-cyan-400 bg-clip-text text-transparent">
-          ▮▮ SALIF CIPHER ▮▮
+          ▮▮ SALIH CIPHER ▮▮
         </h1>
         <p className="text-slate-400 text-sm mt-2 opacity-75">
           // Cryptographic Pipeline System
