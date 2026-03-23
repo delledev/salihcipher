@@ -1,9 +1,9 @@
 import { SBOX, INV_SBOX } from "./constants";
-import { 
-  stringToBytes, 
-  prepareBlocks, 
-  substituteBlockArray, 
-  xorBlocks, 
+import {
+  stringToBytes,
+  prepareBlocks,
+  substituteBlockArray,
+  xorBlocks,
   xorBlockWithKey,
   incrementNonce,
   hexToBlocks
@@ -50,10 +50,10 @@ export interface TraceStep {
 
 export function getEncryptionTrace(plaintext: string, key: Uint8Array, nonce: Uint8Array): TraceStep[] {
   if (!plaintext) return [];
-  
+
   const bytes = stringToBytes(plaintext);
   const blocks = prepareBlocks(bytes);
-  
+
   const steps: TraceStep[] = [
     { label: "1. Input Blocks", blocks: blocks.map(b => Array.from(b)), description: "Plaintext padded and split into 16-byte blocks." }
   ];
@@ -63,14 +63,14 @@ export function getEncryptionTrace(plaintext: string, key: Uint8Array, nonce: Ui
 
   let currentNonce = new Uint8Array(nonce);
   let previousCiphertext: Uint8Array | null = null;
-  
+
   const mirrorBlocks: number[][] = [];
   const mixedBlocks: number[][] = [];
   const finalBlocks: number[][] = [];
 
   for (const sboxBlock of sboxBlocks) {
     const derivedKey = xorBlocks(key, currentNonce);
-    
+
     // Step: Mirror
     let block = doubleMirrorXor(sboxBlock, currentNonce);
     mirrorBlocks.push(Array.from(block));
@@ -84,7 +84,7 @@ export function getEncryptionTrace(plaintext: string, key: Uint8Array, nonce: Ui
     if (previousCiphertext) {
       block = xorBlocks(block, previousCiphertext);
     }
-    
+
     finalBlocks.push(Array.from(block));
     previousCiphertext = block;
     currentNonce = new Uint8Array(incrementNonce(currentNonce));
@@ -98,60 +98,60 @@ export function getEncryptionTrace(plaintext: string, key: Uint8Array, nonce: Ui
 }
 
 export function getDecryptionTrace(ciphertext: string, key: Uint8Array, nonce: Uint8Array): TraceStep[] {
-    const cipherBlocks = hexToBlocks(ciphertext);
-    if (!cipherBlocks || cipherBlocks.length === 0) return [];
+  const cipherBlocks = hexToBlocks(ciphertext);
+  if (!cipherBlocks || cipherBlocks.length === 0) return [];
 
-    const steps: TraceStep[] = [
-        { label: "1. Received Blocks", blocks: cipherBlocks.map(b => Array.from(b)), description: "The raw encrypted data blocks received for processing." }
-    ];
+  const steps: TraceStep[] = [
+    { label: "1. Received Blocks", blocks: cipherBlocks.map(b => Array.from(b)), description: "The raw encrypted data blocks received for processing." }
+  ];
 
-    let currentNonce = new Uint8Array(nonce);
-    let previousCiphertext: Uint8Array | null = null;
-    
-    const unkeyedBlocks: number[][] = [];
-    const unmixedBlocks: number[][] = [];
-    const plainBlocks: number[][] = [];
+  let currentNonce = new Uint8Array(nonce);
+  let previousCiphertext: Uint8Array | null = null;
 
-    for (let i = 0; i < cipherBlocks.length; i++) {
-        const derivedKey = xorBlocks(key, currentNonce);
-        let block = new Uint8Array(cipherBlocks[i]);
+  const unkeyedBlocks: number[][] = [];
+  const unmixedBlocks: number[][] = [];
+  const plainBlocks: number[][] = [];
 
-        // Reverse CBC
-        const currentCipherBlock = new Uint8Array(block);
-        if (previousCiphertext) {
-            block = new Uint8Array(xorBlocks(block, previousCiphertext));
-        }
+  for (let i = 0; i < cipherBlocks.length; i++) {
+    const derivedKey = xorBlocks(key, currentNonce);
+    let block = new Uint8Array(cipherBlocks[i]);
 
-        // Reverse Key XOR
-        block = new Uint8Array(xorBlockWithKey(block, derivedKey));
-        unkeyedBlocks.push(Array.from(block));
-
-        // Reverse Mix
-        const rotated = new Uint8Array(16);
-        for (let j = 0; j < 16; j++) rotated[j] = block[(j + 7) % 16];
-        block = rotated;
-        unmixedBlocks.push(Array.from(block));
-
-        // Reverse Mirror
-        const incNonce = incrementNonce(currentNonce);
-        let state = new Uint8Array(block);
-        for (let j = 0; j < 16; j++) state[j] ^= incNonce[j];
-        state = new Uint8Array(reverseBitsInBlock(state));
-        for (let j = 0; j < 16; j++) state[j] ^= currentNonce[j];
-        state = new Uint8Array(reverseBitsInBlock(state));
-        block = state;
-
-        // Inverse S-Box
-        const plainBlock = substituteBlockArray([block], INV_SBOX)[0];
-        plainBlocks.push(Array.from(plainBlock));
-
-        previousCiphertext = currentCipherBlock;
-        currentNonce = new Uint8Array(incrementNonce(currentNonce));
+    // Reverse CBC
+    const currentCipherBlock = new Uint8Array(block);
+    if (previousCiphertext) {
+      block = new Uint8Array(xorBlocks(block, previousCiphertext));
     }
 
-    steps.push({ label: "2. Reversed XOR", blocks: unkeyedBlocks, description: "Un-chained blocks by reversing CBC and removing the session key." });
-    steps.push({ label: "3. Reversed Mix", blocks: unmixedBlocks, description: "Inverted the diffusion layer to restore original byte alignments." });
-    steps.push({ label: "4. Plaintext Blocks", blocks: plainBlocks, description: "Successfully recovered original plaintext blocks before unpadding." });
+    // Reverse Key XOR
+    block = new Uint8Array(xorBlockWithKey(block, derivedKey));
+    unkeyedBlocks.push(Array.from(block));
 
-    return steps;
+    // Reverse Mix
+    const rotated = new Uint8Array(16);
+    for (let j = 0; j < 16; j++) rotated[j] = block[(j + 7) % 16];
+    block = rotated;
+    unmixedBlocks.push(Array.from(block));
+
+    // Reverse Mirror
+    const incNonce = incrementNonce(currentNonce);
+    let state = new Uint8Array(block);
+    for (let j = 0; j < 16; j++) state[j] ^= incNonce[j];
+    state = new Uint8Array(reverseBitsInBlock(state));
+    for (let j = 0; j < 16; j++) state[j] ^= currentNonce[j];
+    state = new Uint8Array(reverseBitsInBlock(state));
+    block = state;
+
+    // Inverse S-Box
+    const plainBlock = substituteBlockArray([block], INV_SBOX)[0];
+    plainBlocks.push(Array.from(plainBlock));
+
+    previousCiphertext = currentCipherBlock;
+    currentNonce = new Uint8Array(incrementNonce(currentNonce));
+  }
+
+  steps.push({ label: "2. Reversed XOR", blocks: unkeyedBlocks, description: "Un-chained blocks by reversing CBC and removing the session key." });
+  steps.push({ label: "3. Reversed Mix", blocks: unmixedBlocks, description: "Inverted the diffusion layer to restore original byte alignments." });
+  steps.push({ label: "4. Plaintext Blocks", blocks: plainBlocks, description: "Successfully recovered original plaintext blocks before unpadding." });
+
+  return steps;
 }

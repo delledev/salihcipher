@@ -6,9 +6,9 @@ import { getEncryptionTrace, getDecryptionTrace, TraceStep } from "@/lib/trace";
 
 const HexGrid = ({ data, label }: { data: number[]; label?: string }) => {
   if (!data) return null; // Guard against undefined
-  
+
   const displayData = data.length > 16 ? data.slice(0, 16) : data;
-  
+
   return (
     <div className="flex flex-col gap-2">
       {label && (
@@ -18,8 +18,8 @@ const HexGrid = ({ data, label }: { data: number[]; label?: string }) => {
       )}
       <div className="grid grid-cols-4 gap-2 p-3 bg-black/60 border border-white/10 rounded-2xl shadow-inner">
         {displayData.map((byte, i) => (
-          <div 
-            key={i} 
+          <div
+            key={i}
             className="flex flex-col items-center justify-center py-2 px-1 rounded-xl bg-neutral-800/80 border border-white/[0.05] group/byte transition-all hover:bg-neutral-700/80"
           >
             <span className="text-sm font-mono font-bold text-indigo-200 uppercase tracking-tight">
@@ -40,7 +40,7 @@ export default function CipherApp() {
   const [keyInput, setKeyInput] = useState("");
   const [nonceInput, setNonceInput] = useState("");
   const [ciphertext, setCiphertext] = useState("");
-  
+
   const [decryptKey, setDecryptKey] = useState("");
   const [decryptNonce, setDecryptNonce] = useState("");
   const [decryptCipher, setDecryptCipher] = useState("");
@@ -103,7 +103,7 @@ export default function CipherApp() {
       setDecryptKey(keyInput);
       setDecryptNonce(nonceInput);
       setDecryptCipher(encrypted);
-      setDecrypted(""); 
+      setDecrypted("");
       setTraceSteps(getEncryptionTrace(plaintext, key, nonce));
       setTraceType("encrypt");
     } catch (error) {
@@ -149,12 +149,12 @@ export default function CipherApp() {
         {/* Header */}
         <div className="text-center mb-16 flex flex-col items-center">
           <div className="inline-flex items-center p-2 bg-zinc-900/50 border border-white/10 rounded-2xl shadow-2xl backdrop-blur-md">
-             <div className="bg-indigo-500/20 p-3 rounded-xl mr-4 flex items-center justify-center">
-                <svg className="w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-             </div>
-             <div className="pr-6 text-left">
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">Salih Cipher</h1>
-             </div>
+            <div className="bg-indigo-500/20 p-3 rounded-xl mr-4 flex items-center justify-center">
+              <svg className="w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+            </div>
+            <div className="pr-6 text-left">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">Salih Cipher</h1>
+            </div>
           </div>
         </div>
 
@@ -262,12 +262,12 @@ export default function CipherApp() {
               {traceSteps.map((step, idx) => (
                 <div key={idx} className="space-y-8 p-10 bg-neutral-900/60 border border-white/10 rounded-[3.5rem] backdrop-blur-2xl shadow-2xl relative overflow-hidden group">
                   <div className="absolute top-0 left-0 w-2 h-full bg-indigo-500/20 group-hover:bg-indigo-500/40 transition-all" />
-                  
+
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="space-y-2">
-                       <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20">Step 0{idx + 1}</span>
-                       <h3 className="text-2xl font-black text-white uppercase tracking-tight">{step.label}</h3>
-                       <p className="text-sm text-neutral-400 font-medium max-w-2xl leading-relaxed">{step.description}</p>
+                      <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20">Step 0{idx + 1}</span>
+                      <h3 className="text-2xl font-black text-white uppercase tracking-tight">{step.label}</h3>
+                      <p className="text-sm text-neutral-400 font-medium max-w-2xl leading-relaxed">{step.description}</p>
                     </div>
                   </div>
 
@@ -281,7 +281,7 @@ export default function CipherApp() {
             </div>
           </div>
         )}
-        
+
       </div>
     </div>
   );
