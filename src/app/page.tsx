@@ -36,7 +36,7 @@ const HexGrid = ({ data, label }: { data: number[]; label?: string }) => {
 };
 
 export default function CipherApp() {
-  const [plaintext, setPlaintext] = useState("");
+  const [plaintext, setPlaintext] = useState("Merhaba");
   const [keyInput, setKeyInput] = useState("");
   const [nonceInput, setNonceInput] = useState("");
   const [ciphertext, setCiphertext] = useState("");
@@ -91,17 +91,33 @@ export default function CipherApp() {
   };
 
   const handleEncrypt = () => {
-    const key = parseHexKey(keyInput);
-    const nonce = parseHexKey(nonceInput);
+    let currentKeyInput = keyInput;
+    let currentNonceInput = nonceInput;
+
+    // Auto-generate if blank
+    if (!currentKeyInput || currentKeyInput.length !== 32) {
+      const key = crypto.getRandomValues(new Uint8Array(16));
+      currentKeyInput = Array.from(key).map((b) => b.toString(16).padStart(2, "0")).join("");
+      setKeyInput(currentKeyInput);
+    }
+    if (!currentNonceInput || currentNonceInput.length !== 32) {
+      const nonce = crypto.getRandomValues(new Uint8Array(16));
+      currentNonceInput = Array.from(nonce).map((b) => b.toString(16).padStart(2, "0")).join("");
+      setNonceInput(currentNonceInput);
+    }
+
+    const key = parseHexKey(currentKeyInput);
+    const nonce = parseHexKey(currentNonceInput);
+    
     if (!key || !nonce || !plaintext) {
-      alert("Invalid input. Key/Nonce must be 32 hex chars.");
+      alert("Encryption failed. Ensure plaintext is not empty.");
       return;
     }
     try {
       const encrypted = encrypt(plaintext, key, nonce);
       setCiphertext(encrypted);
-      setDecryptKey(keyInput);
-      setDecryptNonce(nonceInput);
+      setDecryptKey(currentKeyInput);
+      setDecryptNonce(currentNonceInput);
       setDecryptCipher(encrypted);
       setDecrypted("");
       setTraceSteps(getEncryptionTrace(plaintext, key, nonce));
@@ -152,9 +168,17 @@ export default function CipherApp() {
             <div className="bg-indigo-500/20 p-3 rounded-xl mr-4 flex items-center justify-center">
               <svg className="w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
             </div>
-            <div className="pr-6 text-left">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">Salih Cipher</h1>
-            </div>
+             <div className="pr-6 text-left">
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">Salih Cipher</h1>
+                <a 
+                  href="https://salihturkoglu.com/cdn/salihcipher.pdf" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-[10px] font-black text-indigo-400/60 hover:text-indigo-300 transition-colors uppercase tracking-[0.2em] mt-1 block"
+                >
+                  Algorithm Details &rarr;
+                </a>
+             </div>
           </div>
         </div>
 
